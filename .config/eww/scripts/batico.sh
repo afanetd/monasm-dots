@@ -26,8 +26,8 @@ get_icon(){
 }
 
 while true; do
-    BATTERY=$(cat /sys/class/power_supply/BAT0/capacity)
-    STATUS=$(cat /sys/class/power_supply/BAT0/status)
+    BATTERY=$(cat /sys/class/power_supply/BAT1/capacity)
+    STATUS=$(cat /sys/class/power_supply/BAT1/status)
     CLASS=""
     ICON=""
     get_icon "$BATTERY"

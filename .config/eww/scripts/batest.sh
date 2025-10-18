@@ -1,11 +1,11 @@
 #!/bin/bash
 
 while true; do
-    CHARGE_NOW=$(cat /sys/class/power_supply/BAT0/charge_now)
-    CURRENT_NOW=$(cat /sys/class/power_supply/BAT0/current_now)
+    CHARGE_NOW=$(cat /sys/class/power_supply/BAT1/charge_now)
+    CURRENT_NOW=$(cat /sys/class/power_supply/BAT1/current_now)
     CURRENT_NOW=${CURRENT_NOW#-}
-    CHARGE_FULL=$(cat /sys/class/power_supply/BAT0/charge_full)
-    STATUS=$(cat /sys/class/power_supply/BAT0/status)
+    CHARGE_FULL=$(cat /sys/class/power_supply/BAT1/charge_full)
+    STATUS=$(cat /sys/class/power_supply/BAT1/status)
 
     if [ "$CURRENT_NOW" -ne 0 ]; then
         if [[ "$STATUS" == "Discharging" ]]; then

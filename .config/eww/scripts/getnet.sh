@@ -1,46 +1,53 @@
 #!/bin/bash
 
-declare -A SEEN
-declare -A AUTO
+# Находим имя беспроводного устройства (например, wlan0)
+device=$(iwctl device list | awk '/station/ {print $1}')
 
-mapfile -t CONNS < <(nmcli -t -f NAME connection show)
+# Если устройство не найдено, выводим пустой массив и выходим
+if [[ -z "$device" ]]; then
+    echo "[]"
+    exit 0
+fi
 
-for conn_name in "${CONNS[@]}"; do
-    ssid=$(nmcli -g 802-11-wireless.ssid connection show "$conn_name" 2>/dev/null)
-    autoconnect=$(nmcli -g connection.autoconnect connection show "$conn_name" 2>/dev/null)
-    
-    if [[ -n "$ssid" ]]; then 
-        AUTO["$ssid"]=$autoconnect
-    fi
-done
+# Получаем SSID текущей подключенной сети
+connected_ssid=$(iwctl station "$device" show | grep "Connected network" | awk '{print $3}')
 
-wifi_list=()
+# Получаем список всех известных (сохраненных) сетей в ассоциативный массив для быстрой проверки
+declare -A KNOWN_NETWORKS
+while read -r ssid security hidden; do
+    [[ -n "$ssid" ]] && KNOWN_NETWORKS["$ssid"]=1
+done < <(iwctl known-networks list | tail -n +5 | awk '{$1=$1;print}') # tail убирает заголовок
 
-while IFS=: read -r inuse ssid; do
-    [[ -z "$ssid" ]] && continue
-    if [[ -n "${SEEN[$ssid]}" ]]; then
-        continue
-    fi
-    SEEN["$ssid"]=1
+# Массив для хранения JSON-объектов каждой сети
+declare -a wifi_list
 
+# Получаем список всех видимых в данный момент сетей
+# tail убирает заголовок
+while read -r ssid security signal; do
+    # Пропускаем пустые строки или остатки заголовка
+    [[ -z "$ssid" || "$ssid" == "SSID" ]] && continue
+
+    # Проверяем, активна ли эта сеть
     in_use=false
-    [[ "$inuse" == "*" ]] && in_use=true
+    [[ "$ssid" == "$connected_ssid" ]] && in_use=true
 
+    # Проверяем, сохранена ли эта сеть (аналог autoconnect)
     autoconnect=false
-    [[ -n "${AUTO[$ssid]}" && "${AUTO[$ssid]}" == "yes" ]] && autoconnect=true
+    [[ -v KNOWN_NETWORKS["$ssid"] ]] && autoconnect=true
 
-
+    # Собираем JSON-объект для текущей сети с помощью jq
     wifi_json=$(jq -nc \
         --arg ssid "$ssid" \
         --argjson in_use "$in_use" \
         --argjson autoconnect "$autoconnect" \
         '{
-          ssid: $ssid,
-          in_use: $in_use,
-          autoconnect: $autoconnect
+            ssid: $ssid,
+            in_use: $in_use,
+            autoconnect: $autoconnect
         }')
 
     wifi_list+=("$wifi_json")
-done < <(nmcli -t -f IN-USE,SSID dev wifi list)
+done < <(iwctl station "$device" get-networks | tail -n +5 | awk '{$1=$1;print}')
 
+# Выводим итоговый JSON-массив
 jq -nc --argjson arr "$(printf '[%s]' "$(IFS=,; echo "${wifi_list[*]}")")" '$arr'

@@ -93,7 +93,7 @@
                             (literal :content batico)
                        )
                        (label :class "bsht" 
-                              :text "${EWW_BATTERY.BAT0.capacity}%")
+                              :text "${EWW_BATTERY.BAT1.capacity}%")
                   )
     )
 )
@@ -290,24 +290,27 @@
     )
 )
 
-(defwidget button-module [icon cmd ?class ?subclass]
-    (box :class "${class}"
-         :orientation "h"
-         (eventbox :onclick "${cmd}"
-                   :cursor "pointer"
-                   :class "${subclass}"
-                   (label :text "${icon}")
-         )
-    )
+;; Виджет кнопки
+(defwidget button-module [icon cmd cls subcls]
+  (eventbox
+    :class cls
+    :subclass subcls
+    :onclick cmd
+    :cursor "pointer"
+    (label :text icon)
+  )
 )
 
+;; Виджет меню с кнопкой wofi
 (defwidget menu []
-    (button-module :class "menu"
-                   :subclass "menu-eventbox"
-                   :icon " "
-                   :cmd "~/.config/eww/scripts/menuctl.sh"
-    )
+  (button-module
+    :icon " "
+    :cmd "if ! pgrep -x wofi >/dev/null; then wofi --show drun; fi"
+    :cls "menu"
+    :subcls "menu-eventbox"
+  )
 )
+
 
 (defvar menurev false)
 
@@ -513,7 +516,7 @@
                              :space-evenly false
                              (box :class "username"
                                   :space-evenly false
-                                  (label :text "Monasm")
+                                  (label :text "Afanet")
                              )
                              (box :class "uptime"
                                   :space-evenly false
@@ -522,7 +525,7 @@
                              (box :class "ctlpanel"
                                   (eventbox :cursor "pointer"
                                             :class "shutdown"
-                                            :onclick "systemctl poweroff"
+                                            :onclick "loginctl poweroff"
                                             :tooltip " Shutdown "
                                             (label :text "⏻")
                                   )
@@ -540,19 +543,19 @@
                                   )
                                   (eventbox :cursor "pointer"
                                             :class "reboot"
-                                            :onclick "systemctl reboot"
+                                            :onclick "loginctl reboot"
                                             :tooltip " Reboot "
                                             (label :text "\\uf021")
                                   )
                                   (eventbox :cursor "pointer"
                                             :class "suspend"
-                                            :onclick "systemctl suspend"
+                                            :onclick "loginctl suspend"
                                             :tooltip " Sleep "
                                             (label :text "󰒲")
                                   )
                                   (eventbox :cursor "pointer"
                                             :class "hibernate"
-                                            :onclick "systemctl hibernate"
+                                            :onclick "loginctl hibernate"
                                             :tooltip " Hibernate "
                                             (label :text "\\uf2dc")
                                   )
@@ -575,7 +578,7 @@
                                   :orientation "v"
                                   (box :class "bat-percent"
                                        :space-evenly false
-                                       (label :text "Battery ${EWW_BATTERY.BAT0.capacity}%")
+                                       (label :text "Battery ${EWW_BATTERY.BAT1.capacity}%")
                                   )
                                   (box :class "bat-status"
                                        :space-evenly false

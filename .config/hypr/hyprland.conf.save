@@ -20,9 +20,6 @@ $vol = pamixer --get-volume
 
 exec-once = bash -c 'eww open bar_widget && eww update get_vol="$(pamixer --get-volume)" && ~/.config/eww/scripts/getvol.sh'
 exec-once = bash -c '~/.config/eww/scripts/workspace.sh'
-exec-once = /usr/bin/pipewire
-exec-once = /usr/bin/pipewire-pulse
-exec-once = /usr/bin/wireplumber
 exec-once = hyprpaper &
 #exec-once = hypridle
 exec-once = sh ~/.config/hypr/scripts/text_animation/anitext.sh
@@ -34,8 +31,8 @@ exec-once = sh ~/.config/hypr/scripts/weather/weather.sh
 ### ENVIRONMENT VARIABLES ###
 #############################
 
-env = XCURSOR_THEME,Adwaita
-env = XCURSOR_SIZE,24
+env = XCURSOR_THEME,miku-cursor
+env = XCURSOR_SIZE,32
 env = HYPRCURSOR_SIZE,32
 env = XCURSOR_PATH, /usr/share/icons:/home/$USER/.icons:/home/$USER/.local/share/icons
 env = HYPRCURSOR_MOVE, fleur
@@ -184,9 +181,8 @@ $mainMod = SUPER
 bind = $mainMod, T, exec, $terminal
 bind = $mainMod, W, exec, hyprctl dispatch togglefloating
 bind = $mainMod, A, exec, grim -g "$(slurp)" ~/Pictures/Screenshots/screenshot.jpg
-bind = $mainMod, Q, killactive,
-bind = $mainMod, I, exit,
-bind = $mainMod, M, fullscreen,
+bind = $mainMod, E, killactive,
+bind = $mainMod, M, exit,
 bind = $mainMod, F, exec, kitty ranger
 bind = $mainMod, V, togglefloating,
 bind = $mainMod, space, exec, sh -c "hyprctl switchxkblayout at-translated-set-2-keyboard next"
